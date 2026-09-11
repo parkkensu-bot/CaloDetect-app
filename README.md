@@ -1,1 +1,95 @@
-# iris-streamlit-app
+# AI 맞춤형 식단 다이어리 & 대시보드
+
+이 프로젝트는 이미지 속 식단을 인식하고, 영양 정보를 요약해 보여주는 Streamlit 기반 웹 애플리케이션입니다.
+
+## 프로젝트 개요
+
+- 음식 이미지 입력 후 YOLOv8 기반 객체 인식 수행
+- 인식된 음식명을 한글 라벨로 변환
+- 영양 정보(칼로리, 탄수화물, 단백질, 지방, 당류, 나트륨)를 계산
+- 월별/일별 식단 기록 대시보드 제공
+- 식단 관리 및 추천 기능 포함
+
+## 사용 기술
+
+- Python
+- Streamlit
+- streamlit-echarts
+- PyTorch
+- torchvision
+- Ultralytics YOLO
+- Plotly
+- Pandas
+- Pillow
+- PyYAML
+
+## 폴더 구조
+
+- `app.py` : 메인 Streamlit 애플리케이션
+- `app2.py` : 단일 YOLO 모델 기반 보조 Streamlit 애플리케이션
+- `best.pt` : 음식 객체 탐지 모델 가중치
+- `5차data.yaml` : 모델 클래스 이름 및 데이터셋 설정 파일
+- `CaloDetect_nutrition_all_matched.csv` : 음식별 영양 데이터
+- `requirements.txt` : Python 의존성 패키지 목록
+
+## 실행 전 준비
+
+Python 3.9 이상 권장
+
+1. 가상환경 생성
+
+```bash
+python -m venv .venv
+```
+
+2. Windows에서 가상환경 활성화
+
+```bash
+.\.venv\Scripts\activate
+```
+
+3. 라이브러리 설치
+
+```bash
+pip install -r requirements.txt
+```
+
+## 실행 방법
+
+```bash
+streamlit run app.py
+```
+
+브라우저가 자동으로 열리며, 프로젝트 UI가 표시됩니다.
+
+## 주요 설정
+
+- `app.py`에서 모델 로딩 경로와 임계값을 조정할 수 있습니다.
+- `5차data.yaml`에서 클래스 이름 및 데이터 경로를 수정할 수 있습니다.
+- `CaloDetect_nutrition_all_matched.csv`의 음식명과 영양 수치가 대시보드 계산에 사용됩니다.
+- `requirements.txt`에 필요한 패키지가 추가되면 바로 설치됩니다.
+
+## 앙상블 적용 기록
+
+`app.py`에 YOLOv8-s와 YOLOv8-m 모델의 예측 결과를 결합하는 WBF(Weighted Box Fusion) 앙상블을 적용했습니다.
+
+1. 134행: `load_ensemble_models()`에서 두 모델을 함께 로드하고 캐싱
+2. 137행: YOLOv8-m 모델 가중치인 `best (2).pt` 로드
+3. 211행: `weighted_box_fusion()`에서 동일 클래스의 중첩 박스를 결합
+4. 307행: 탐지 결과의 `source` 필드에 앙상블 참여 모델 표시
+5. 376행: 분석 해상도(`imgsz`) 선택 범위의 최저값을 512까지 낮춤
+6. 317행  모델 추가 
+## 참고사항
+
+- 모델 파일이 해당 폴더에 있어야 정상 실행됩니다.
+- GPU 환경이 있으면 추론 속도가 더 빨라집니다.
+- 라이브러리 추가 또는 버전 변경이 필요하면 `requirements.txt`를 수정한 뒤 설치를 다시 수행하면 됩니다.
+
+## 빠른 설치 명령
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
